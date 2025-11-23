@@ -58,8 +58,8 @@ struct BalanceCardView: View {
             Text("Total Balance")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
-            
-            Text(formatCurrency(viewModel.totalBalance))
+
+            Text(FormatterKit.currencyString(for: viewModel.totalBalance))
                 .font(.system(size: 48, weight: .bold))
                 .foregroundColor(viewModel.totalBalance >= 0 ? .green : .red)
             
@@ -68,7 +68,7 @@ struct BalanceCardView: View {
                     Text("Income")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    Text(formatCurrency(viewModel.monthlyIncome))
+                    Text(FormatterKit.currencyString(for: viewModel.monthlyIncome))
                         .font(.headline)
                         .foregroundColor(.green)
                 }
@@ -80,7 +80,7 @@ struct BalanceCardView: View {
                     Text("Expenses")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    Text(formatCurrency(viewModel.monthlyExpense))
+                    Text(FormatterKit.currencyString(for: viewModel.monthlyExpense))
                         .font(.headline)
                         .foregroundColor(.red)
                 }
@@ -96,12 +96,6 @@ struct BalanceCardView: View {
         )
     }
     
-    private func formatCurrency(_ amount: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        return formatter.string(from: NSNumber(value: amount)) ?? "$0.00"
-    }
 }
 
 struct QuickStatsView: View {
@@ -148,7 +142,7 @@ struct StatCard: View {
                 Text(title)
                     .font(.caption)
                     .foregroundColor(.secondary)
-                Text(formatCurrency(amount))
+                Text(FormatterKit.currencyString(for: amount))
                     .font(.headline)
                     .foregroundColor(.primary)
             }
@@ -160,13 +154,6 @@ struct StatCard: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(.systemBackground))
         )
-    }
-    
-    private func formatCurrency(_ amount: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        return formatter.string(from: NSNumber(value: amount)) ?? "$0.00"
     }
 }
 

@@ -11,8 +11,7 @@ struct TransactionsView: View {
     @EnvironmentObject var viewModel: TransactionViewModel
     @State private var showAddTransaction = false
     @State private var selectedTransaction: Transaction?
-    @State private var showFilters = false
-    
+
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
@@ -28,7 +27,9 @@ struct TransactionsView: View {
                 
                 // Transactions List
                 if viewModel.filteredTransactions.isEmpty {
-                    EmptyStateView()
+                    EmptyStateView {
+                        showAddTransaction = true
+                    }
                 } else {
                     List {
                         ForEach(groupedTransactions.keys.sorted(by: >), id: \.self) { date in
@@ -78,10 +79,7 @@ struct TransactionsView: View {
     }
     
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return formatter.string(from: date)
+        FormatterKit.shortDate.string(from: date)
     }
     
     private func deleteTransactions(at offsets: IndexSet, for date: Date) {
@@ -123,38 +121,75 @@ struct SearchBar: View {
 
 struct FilterChipsView: View {
     @EnvironmentObject var viewModel: TransactionViewModel
-    
+
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                FilterChip(
-                    title: "All",
-                    isSelected: viewModel.selectedFilter == nil && viewModel.selectedCategory == nil,
-                    action: {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("Filters")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+
+                Spacer()
+
+                if viewModel.selectedFilter != nil || viewModel.selectedCategory != nil {
+                    Button("Clear") {
                         viewModel.selectedFilter = nil
                         viewModel.selectedCategory = nil
                     }
-                )
-                
-                FilterChip(
-                    title: "Income",
-                    isSelected: viewModel.selectedFilter == .income,
-                    color: .green,
-                    action: {
-                        viewModel.selectedFilter = viewModel.selectedFilter == .income ? nil : .income
-                    }
-                )
-                
-                FilterChip(
-                    title: "Expenses",
-                    isSelected: viewModel.selectedFilter == .expense,
-                    color: .red,
-                    action: {
-                        viewModel.selectedFilter = viewModel.selectedFilter == .expense ? nil : .expense
-                    }
-                )
+                    .font(.footnote)
+                }
             }
             .padding(.horizontal)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    FilterChip(
+                        title: "All",
+                        isSelected: viewModel.selectedFilter == nil && viewModel.selectedCategory == nil,
+                        action: {
+                            viewModel.selectedFilter = nil
+                            viewModel.selectedCategory = nil
+                        }
+                    )
+
+                    FilterChip(
+                        title: "Income",
+                        isSelected: viewModel.selectedFilter == .income,
+                        color: .green,
+                        action: {
+                            viewModel.selectedFilter = viewModel.selectedFilter == .income ? nil : .income
+                            viewModel.selectedCategory = nil
+                        }
+                    )
+
+                    FilterChip(
+                        title: "Expenses",
+                        isSelected: viewModel.selectedFilter == .expense,
+                        color: .red,
+                        action: {
+                            viewModel.selectedFilter = viewModel.selectedFilter == .expense ? nil : .expense
+                            viewModel.selectedCategory = nil
+                        }
+                    )
+                }
+                .padding(.horizontal)
+            }
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(TransactionCategory.allCases, id: \.self) { category in
+                        FilterChip(
+                            title: category.rawValue,
+                            isSelected: viewModel.selectedCategory == category,
+                            color: category.color,
+                            action: {
+                                viewModel.selectedCategory = viewModel.selectedCategory == category ? nil : category
+                            }
+                        )
+                    }
+                }
+                .padding(.horizontal)
+            }
         }
     }
 }
@@ -182,20 +217,28 @@ struct FilterChip: View {
 }
 
 struct EmptyStateView: View {
+    var action: () -> Void
+
     var body: some View {
         VStack(spacing: 16) {
             Image(systemName: "tray")
                 .font(.system(size: 64))
                 .foregroundColor(.secondary)
-            
+
             Text("No transactions found")
                 .font(.headline)
                 .foregroundColor(.secondary)
-            
+
             Text("Tap the + button to add your first transaction")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
+
+            Button(action: action) {
+                Label("Add Transaction", systemImage: "plus.circle.fill")
+                    .padding(.horizontal, 16)
+            }
+            .buttonStyle(.borderedProminent)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()

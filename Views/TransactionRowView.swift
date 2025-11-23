@@ -47,10 +47,10 @@ struct TransactionRowView: View {
             
             // Amount
             VStack(alignment: .trailing, spacing: 4) {
-                Text(formatCurrency(transaction.amount))
+                Text(FormatterKit.currencyString(for: transaction.amount))
                     .font(.headline)
                     .foregroundColor(transaction.type.color)
-                
+
                 Image(systemName: transaction.type.icon)
                     .font(.caption)
                     .foregroundColor(transaction.type.color.opacity(0.6))
@@ -58,19 +58,9 @@ struct TransactionRowView: View {
         }
         .padding(.vertical, 8)
     }
-    
-    private func formatCurrency(_ amount: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        return formatter.string(from: NSNumber(value: amount)) ?? "$0.00"
-    }
-    
+
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .none
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
+        FormatterKit.shortDateTime.string(from: date)
     }
 }
 
